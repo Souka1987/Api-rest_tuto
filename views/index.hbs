@@ -7,7 +7,10 @@
                 <div class="card-body">
                     <ul class="list_group list-group-flush">
                         {{#each Product}}
-                        <li class="list-group-item">{{title}}</li>
+                        <li class="list-group-item">
+                            {{title}}
+                            <img src="{{this.cover.path}}" alt="" style="max-width:100px">
+                        </li>
                         {{/each}}
                     </ul>
                 </div>
@@ -20,7 +23,7 @@
             <div class="card">
                 <div class="card-body">
 
-                    <form method="POST" action="/">
+                    <form method="POST" action="/" enctype="multipart/form-data">
                         <div class="form-group">
                             <label>Title</label>
                             <input class="form-control" type="text" name="title">
@@ -32,6 +35,10 @@
                         <div class="form-group">
                             <label>Price</label>
                             <input class="form-control" type="text" name="price">
+                        </div>
+                        <div class="form-group">
+                            <label>Cover</label>
+                            <input class="form-control" type="file" name="cover">
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </form>

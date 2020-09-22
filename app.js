@@ -4,7 +4,26 @@ const mongoose = require('mongoose');
 const exphbs = require('express-handlebars');
 const methodOverride = require('method-override')
 
+//upload image
+const multer = require('multer');
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './public/uploads')
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname())
+    }
+})
+
+const upload = multer({storage:storage})
+
+//express
+const port = process.env.PORT || 7777;
 const app = express();
+
+
+//express static
+app.use(express.static("public"))
 
 //methode-override => pour la mise à jour.
 app.use(methodOverride("_method"));
@@ -30,11 +49,17 @@ mongoose.connect("mongodb://localhost:27017/boutiqueGame", {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-// Model
+// Indiquer ici ce qui se trouvera dans la base de connées.
 const productSchema = {
     title: String,
     content: String,
-    price: Number
+    price: Number,
+    cover: {
+        name: String,
+        originalName: String,
+        path: String,
+        createAt: Date
+    }
 };
 
 const Product = mongoose.model("product", productSchema)
@@ -56,13 +81,29 @@ app.route("/")
         })
     })
 
-    .post((req, res) => {
+    .post(upload.single("cover"), (req, res) => {
+        const file = req.file;
+        console.log(file);
+
         const newProduct = new Product({
             title: req.body.title,
             content: req.body.content,
             price: req.body.price
 
-        })
+        });
+
+        if (file) {
+            newProduct.cover = {
+                name: file.filename,
+                originalName: file.originalname,
+                //path:"uploads/" + filename
+                path: file.path.replace("public", ""),
+                createAt: Date.now()
+            }
+        }
+
+
+
         newProduct.save(function (err) {
             if (!err) {
                 res.send("save ok !")
@@ -134,7 +175,7 @@ app.route("/:id")
     .delete(function (req, res) {
         /*pour supprimer 1 seule variable, en fonction de son id*/
         Product.deleteOne({
-                _id: req.params.id 
+                _id: req.params.id
             },
             function (err) {
                 if (!err) {
@@ -146,6 +187,6 @@ app.route("/:id")
         )
     })
 
-app.listen(4000, function () {
-    console.log('écoute le port 4000');
+app.listen(port, function () {
+    console.log(`écoute le port ${port}, lancé à : ${new Date().toLocaleString()}`);
 })

@@ -8,9 +8,10 @@
                     <ul class="list_group list-group-flush">
                         {{#each Product }}
                         <li class="list-group-item">
-                            {{this.title }}
-                            <span>source multer</span>
-                            <img src="{{this.cover.path}}" alt="" style="max-width:100px">
+                            <h3>{{this.title }}</h3>
+                            <p>{{this.category.title}}</p>
+
+
                             <span>source sharp</span>
                             <img src="{{this.cover.urlSharp}}" alt="" style="max-width:100px">
                         </li>
@@ -43,7 +44,7 @@
                         <div class="form-group">
                             <label for="exempleFormControlSelect1">Category</label>
                             <select name="Category" class="form-control" id="exempleFormConttrolSelect1">
-                                {{#each categorie }}
+                                {{#each Category }}
                                 <option value="{{this._id}}">{{this.title }}</option>
                                 {{/each }}
                             </select>
@@ -81,14 +82,14 @@
                 <div class="card-body">
 
                     <ul class="list-group list-group-flush">
-                        {{#each Product}}
+                        {{#each Product }}
                         <li class="list-group-item">
-                            {{this.title}}
+                            {{this.title }}
                             <form action="{{this._id}}/?_method=DELETE" method="post">
                                 <button type="submit" class="btn btn-danger btn-sm">Effacer</button>
                             </form>
                         </li>
-                        {{/each}}
+                        {{/each }}
                     </ul>
 
                     <form action="/?_method=DELETE" method="POST">

@@ -7,10 +7,10 @@ Nodejs avec interaction base données (ici, MongoDB):
 - Pour les images voir la méthode "mutler" : https://www.npmjs.com/package/multer
 - Pour la mise à jour voir la méthode "methodOverride" : https://www.npmjs.com/package/method-override
 - Il est possible de changer le numéro du port
-- faire démarrer son projet toujours avec nodemon app.js
+- Faire démarrer son projet toujours avec nodemon app.js
 - voir méthode "extname"  https://nodejs.org/api/path.html#path_path_extname_path
 - Pour costumiser une image avec le module "sharp" : https://sharp.pixelplumbing.com/install
-
+- La méthode "populate()" sert à faire la liaison entre 2 collections.
 
 Dans le script, "cb" = callback, "path" = chemin.
 

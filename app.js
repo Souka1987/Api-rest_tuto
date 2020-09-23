@@ -84,6 +84,8 @@ const productSchema = new mongoose.Schema({
     title: String,
     content: String,
     price: Number,
+    category:{type: mongoose.Schema.Types.ObjectId, ref: "category"},
+
     cover: {
         name: String,
         originalName: String,
@@ -136,13 +138,14 @@ app.route("/")
 
         Product
             .find()
+            .populate("category")
             .exec(function (err, produit) {
                 if (!err) {
 
                     Category.find(function (err, category) {
                         res.render("index", {
                             Product: produit,
-                            categorie: Category
+                            Category: category
                         })
                     })
                 } else {
@@ -161,14 +164,15 @@ app.route("/")
             .webp({
                 quality: 80
             }) // => "webp", format google
-            .rotate(90)
+            //.rotate(90)
             .toFile('./public/uploads/web' + file.originalname.split('-').slice(0, -1).join('-') + ".webp", (err, info) => {});
 
 
         const newProduct = new Product({
             title: req.body.title,
             content: req.body.content,
-            price: req.body.price
+            price: req.body.price,
+            category: req.body.category
 
         });
 

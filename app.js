@@ -2,7 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const exphbs = require('express-handlebars');
-const methodOverride = require('method-override')
+const methodOverride = require('method-override');
+const path = require('path');
+const sharp = require('sharp')
+
 
 //upload image
 const multer = require('multer');
@@ -10,12 +13,39 @@ const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './public/uploads')
     },
+
     filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname())
+
+        //console.log(file)
+
+        const ext = path.extname(file.originalname);
+        const date = Date.now();
+
+        cb(null, date + '-' + file.originalname)
+        //cb(null, file.originalName + '-' + Date.now() + ext)
     }
 })
 
-const upload = multer({storage:storage})
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 1 * 3000 * 3000,
+        // pour les dimentions mettre ce que l'on veut
+        files: 1
+    },
+    fileFilter: function (req, file, cb) {
+        /* => Pour le filtrage des images*/
+        if (
+            file.mimetype === "image/png" ||
+            file.mimetype === "image/jpeg" ||
+            file.mimetype === "image/gif"
+        ) {
+            cb(null, true)
+        } else
+            cb(new Error('Le fichier doit être au format png, jpeg ou gif.'))
+    }
+
+})
 
 //express
 const port = process.env.PORT || 7777;
@@ -50,7 +80,7 @@ mongoose.connect("mongodb://localhost:27017/boutiqueGame", {
     useUnifiedTopology: true
 })
 // Indiquer ici ce qui se trouvera dans la base de connées.
-const productSchema = {
+const productSchema = new mongoose.Schema({
     title: String,
     content: String,
     price: Number,
@@ -58,32 +88,82 @@ const productSchema = {
         name: String,
         originalName: String,
         path: String,
+        urlSharp: String,
         createAt: Date
     }
-};
+});
+
+const categorySchema = new mongoose.Schema({
+    title: String,
+
+})
 
 const Product = mongoose.model("product", productSchema)
+const Category = mongoose.model("category", categorySchema)
 
 //Routes
-app.route("/")
+app.route("/category")
     .get((req, res) => {
-        //MyModel.find({ name: 'john', age: { $gte: 18 }}, function (err, docs) {});
-        Product.find(function (err, produit) {
+        Category.find((err, category) => {
             if (!err) {
-                console.log(produit)
-                res.render("index", {
-                    Product: produit
+                res.render("category", {
+                    categorie: category
                 })
             } else {
                 res.send(err)
             }
-
         })
+    })
+
+    .post((req, res) => {
+        const newCategory = new Category({
+            title: req.body.title
+        })
+
+        newCategory.save(function (err) {
+            if (!err) {
+                res.send("save ok !")
+            } else {
+                res.send(err)
+            }
+        })
+    })
+
+//===========================================//
+
+app.route("/")
+    .get((req, res) => {
+
+        Product
+            .find()
+            .exec(function (err, produit) {
+                if (!err) {
+
+                    Category.find(function (err, category) {
+                        res.render("index", {
+                            Product: produit,
+                            categorie: Category
+                        })
+                    })
+                } else {
+                    res.send(err)
+                }
+
+            })
     })
 
     .post(upload.single("cover"), (req, res) => {
         const file = req.file;
         console.log(file);
+
+        sharp(file.path)
+            .resize(200)
+            .webp({
+                quality: 80
+            }) // => "webp", format google
+            .rotate(90)
+            .toFile('./public/uploads/web' + file.originalname.split('-').slice(0, -1).join('-') + ".webp", (err, info) => {});
+
 
         const newProduct = new Product({
             title: req.body.title,
@@ -95,9 +175,10 @@ app.route("/")
         if (file) {
             newProduct.cover = {
                 name: file.filename,
-                originalName: file.originalname,
+                originalname: file.originalname,
                 //path:"uploads/" + filename
                 path: file.path.replace("public", ""),
+                urlSharp: '/uploads/web' + file.originalname.split('-').slice(0, -1).join('-') + ".webp",
                 createAt: Date.now()
             }
         }

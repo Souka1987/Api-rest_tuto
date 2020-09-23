@@ -1,16 +1,18 @@
-Nodejs avec interaction base données:
+Nodejs avec interaction base données (ici, MongoDB):
 
 1 - Installer MongoDB, ne pas oublier de spécifier le chemin "database"
 2-  Robo 3t
 3-  Mongoose
 
-- Pour les images voir Mutler : https://www.npmjs.com/package/multer
-- Pour la mise à jour voir methodOverride : https://www.npmjs.com/package/method-override
+- Pour les images voir la méthode "mutler" : https://www.npmjs.com/package/multer
+- Pour la mise à jour voir la méthode "methodOverride" : https://www.npmjs.com/package/method-override
 - Il est possible de changer le numéro du port
 - faire démarrer son projet toujours avec nodemon app.js
 - voir méthode "extname"  https://nodejs.org/api/path.html#path_path_extname_path
+- Pour costumiser une image avec le module "sharp" : https://sharp.pixelplumbing.com/install
 
-Dans le script, cb = callback 
+
+Dans le script, "cb" = callback, "path" = chemin.
 
 ! Toujours vérifier la version d'handlebars. Et voir les autres fichiers
 se trouvant dans le json.

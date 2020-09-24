@@ -10,8 +10,7 @@ const sharp = require('sharp')
 const mongooseAlgolia = require('mongoose-algolia');
 const algoliasearch = require('algoliasearch');
 const client = algoliasearch("2J6ZG5DUIZ", "17a8ad13cbc6553b47757da33f5b3fe0");
-
-
+const index = client.initIndex('products')
 
 //upload image
 const multer = require('multer');
@@ -86,6 +85,7 @@ mongoose.connect("mongodb://localhost:27017/boutiqueGame", {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
+
 // Indiquer ici ce qui se trouvera dans la base de connées.
 const productSchema = new mongoose.Schema({
     title: String,
@@ -142,10 +142,12 @@ const Category = mongoose.model("category", categorySchema)
 
 //Routes
 app.route("/search")
-    .get((req, res) => {
-
+    .get(async (req, res) => {
+        console.log("1");
 
         if (req.query.q) {
+            console.log('2.1')
+            console.log(req.query.q)
             //console.log(req.query.q);
             let queries = [{
                 indexName: "products",
@@ -154,13 +156,25 @@ app.route("/search")
                     hitsPerPage: 8 //Nombre de résultats
                 }
             }]
-            client.search(queries, function (err, data) {
-                //console.log(data.results(0));
+            // console.log(queries)
+            // console.log(client)
+            index
+                .search(queries)
+                .then(({result}) => {
+                    console.log(result)
+                })
+                .catch(err => console.log(err))
+                // .search(queries.indexName, function (err, data) {
+                //     if (err) return console.log(err)
+                //     //console.log(data.results(0));
+                //     console.log(data)
 
-                res.locals.search_results = data.results && data.results[0] && data.results[0].hits ? data.results[0].hits : [] //"hits" = cible.
-                res.render("search")
-            });
+                //     res.locals.search_results = data.results && data.results[0] && data.results[0].hits ? data.results[0].hits : [] //"hits" = cible.
+                //     console.log(res.locals.search_results);
+                //     res.render("search")
+                // });
         } else {
+            console.log('2.2')
             res.render("search")
         }
 

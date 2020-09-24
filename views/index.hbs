@@ -9,11 +9,9 @@
                         {{#each Product }}
                         <li class="list-group-item">
                             <h3>{{this.title }}</h3>
-                            <p>{{this.category.title}}</p>
-
-
+                                <p>{{ this.category.title }}</p>
                             <span>source sharp</span>
-                            <img src="{{this.cover.urlSharp}}" alt="" style="max-width:100px">
+                            <img src="{{this.cover.urlSharp}}" alt="" style="max-width:200px">
                         </li>
                         {{/each }}
                     </ul>
@@ -43,7 +41,7 @@
 
                         <div class="form-group">
                             <label for="exempleFormControlSelect1">Category</label>
-                            <select name="Category" class="form-control" id="exempleFormConttrolSelect1">
+                            <select name="category" class="form-control" id="exempleFormConttrolSelect1">
                                 {{#each Category }}
                                 <option value="{{this._id}}">{{this.title }}</option>
                                 {{/each }}

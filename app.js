@@ -6,9 +6,16 @@ const methodOverride = require('method-override');
 const path = require('path');
 const sharp = require('sharp')
 
+// Algolia
+const mongooseAlgolia = require('mongoose-algolia');
+const algoliasearch = require('algoliasearch');
+const client = algoliasearch("2J6ZG5DUIZ", "17a8ad13cbc6553b47757da33f5b3fe0");
+
+
 
 //upload image
 const multer = require('multer');
+//const { default: algoliasearch } = require('algoliasearch');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './public/uploads')
@@ -84,7 +91,10 @@ const productSchema = new mongoose.Schema({
     title: String,
     content: String,
     price: Number,
-    category:{type: mongoose.Schema.Types.ObjectId, ref: "category"},
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "category"
+    },
 
     cover: {
         name: String,
@@ -96,14 +106,68 @@ const productSchema = new mongoose.Schema({
 });
 
 const categorySchema = new mongoose.Schema({
-    title: String,
-
+    title: String
 })
+
+//Aller sur le site officiel d'Algolia pour récupérer les infos après création du compte et de l'index.
+productSchema.plugin(mongooseAlgolia, {
+    appId: "2J6ZG5DUIZ",
+    apiKey: "17a8ad13cbc6553b47757da33f5b3fe0",
+    indexName: 'products', //The name of the index in Algolia, you can also pass in a function
+    selector: 'title category', //You can decide which field that are getting synced to Algolia (same as selector in mongoose)
+    populate: {
+        path: 'category',
+        select: 'title',
+    },
+    defaults: {
+        author: 'unknown',
+    },
+    mappings: {
+        title: function (value) {
+            return value
+        },
+    },
+    virtuals: {
+        whatever: function (doc) {
+            return `Custom data ${doc.title}`
+        },
+    },
+
+    debug: true, // Default: false -> If true operations are logged out in your console
+})
+
 
 const Product = mongoose.model("product", productSchema)
 const Category = mongoose.model("category", categorySchema)
 
 //Routes
+app.route("/search")
+    .get((req, res) => {
+
+
+        if (req.query.q) {
+            //console.log(req.query.q);
+            let queries = [{
+                indexName: "products",
+                query: req.query.q,
+                params: {
+                    hitsPerPage: 8 //Nombre de résultats
+                }
+            }]
+            client.search(queries, function (err, data) {
+                //console.log(data.results(0));
+
+                res.locals.search_results = data.results && data.results[0] && data.results[0].hits ? data.results[0].hits : [] //"hits" = cible.
+                res.render("search")
+            });
+        } else {
+            res.render("search")
+        }
+
+    })
+
+
+
 app.route("/category")
     .get((req, res) => {
         Category.find((err, category) => {
@@ -141,8 +205,9 @@ app.route("/")
             .populate("category")
             .exec(function (err, produit) {
                 if (!err) {
-
                     Category.find(function (err, category) {
+                        console.log(produit)
+                        console.log(category)
                         res.render("index", {
                             Product: produit,
                             Category: category
@@ -158,6 +223,8 @@ app.route("/")
     .post(upload.single("cover"), (req, res) => {
         const file = req.file;
         console.log(file);
+
+        console.log(req.body)
 
         sharp(file.path)
             .resize(200)

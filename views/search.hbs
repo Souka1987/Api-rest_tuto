@@ -4,7 +4,7 @@
         <div class="col-md-3">
             <h1>GET</h1>
 
-            <form action="/search" method="GET">
+            <form action="/search" method="post">
                 <div class="form-group">
                     <label for="exempleInputEmail1">Search</label>
                     <input type="search" class="form-control" name="q">
@@ -13,9 +13,9 @@
 
             <div>
                 <h4>Résultat :</h4>
-                {{#each search_results}}
-                <a href="/{{this.objectID}}">{{this.title}}</a>
-                {{/each}}
+                {{#each results }}
+                <a href="/{{ _id }}">{{ title }}</a>
+                {{/each }}
             </div>
         </div>
     </div>

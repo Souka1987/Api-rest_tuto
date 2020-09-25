@@ -143,42 +143,47 @@ const Category = mongoose.model("category", categorySchema)
 //Routes
 app.route("/search")
     .get(async (req, res) => {
-        console.log("1");
-
-        if (req.query.q) {
-            console.log('2.1')
-            console.log(req.query.q)
-            //console.log(req.query.q);
-            let queries = [{
-                indexName: "products",
-                query: req.query.q,
-                params: {
-                    hitsPerPage: 8 //Nombre de résultats
-                }
-            }]
-            // console.log(queries)
-            // console.log(client)
-            index
-                .search(queries)
-                .then(({result}) => {
-                    console.log(result)
-                })
-                .catch(err => console.log(err))
-                // .search(queries.indexName, function (err, data) {
-                //     if (err) return console.log(err)
-                //     //console.log(data.results(0));
-                //     console.log(data)
-
-                //     res.locals.search_results = data.results && data.results[0] && data.results[0].hits ? data.results[0].hits : [] //"hits" = cible.
-                //     console.log(res.locals.search_results);
-                //     res.render("search")
-                // });
-        } else {
-            console.log('2.2')
-            res.render("search")
-        }
-
+        // const objects = await Product.find()
+        const objects = []
+        // const objects = [
+        //     {
+        //       objectID: 1,
+        //       name: "Foo"
+        //     }
+        //   ];
+        index
+            .saveObjects(objects)
+            // .saveObjects(objects, { autoGenerateObjectIDIfNotExist: true })
+            .then(({
+                objectIDs
+            }) => {
+                console.log(objectIDs);
+                res.render('search')
+            })
+            .catch(err => {
+                console.log(err);
+            });
     })
+    .post((req, res) => {
+        if (req.body.q) {
+            index
+                .search(req.body.q)
+                .then(({
+                    hits
+                }) => {
+                    console.log(hits);
+                    res.render('search', {
+                        results: hits
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        } else {
+            res.render('search')
+        }
+    })
+
 
 
 
